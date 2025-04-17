@@ -185,7 +185,8 @@
     </build>
     </profile>
 </profiles>
-
+    
+    <!--  Use Maven profiles (cloudhub2, onprem) to separate configurations.-->
 	<build>
 		<plugins>
 			<plugin>
