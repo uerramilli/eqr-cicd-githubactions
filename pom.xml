@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>400875ba-f8ac-427f-a20d-92d09494ffbe</groupId> <!-- stick your OrgID -->
+	<artifactId>eqr-cicd-githubactions</artifactId>
+	<version>${revision}</version>
+	<packaging>mule-application</packaging>
+
+	<name>eqr-cicd-githubactions</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<revision>1.0.0-SNAPSHOT</revision> 
+		<app.runtime>4.9.2</app.runtime>
+		<mule.maven.plugin.version>4.3.0</mule.maven.plugin.version>
+		<muleDeploy>true</muleDeploy>
+        <app.releasechannel>EDGE</app.releasechannel>
+		<app.javaversion>17</app.javaversion>
+	</properties>
+	
+	<!-- Mule’s plugin supports multiple deployment configurations in the same build, even across different profiles. 
+	     Ensure your profiles (dev, onprem, etc.) are not conflicting -->
+	<profiles>
+	<!-- ✅ On-Prem Runtime Deployment -->
+  	<profile>
+    <id>onprem</id>
+    <properties>
+      <mule.environment>Sandbox</mule.environment> <!-- stick your env name-->
+      <mule.businessGroup>SF</mule.businessGroup> <!-- stick your business group name-->
+      <mule.target>mule-ue-server</mule.target> <!-- stick your onprem server name-->
+      <connectedAppClientId>8eb265235f264dec8029fa96429a59f1</connectedAppClientId> <!-- stick your connected app clientId-->
+      <connectedAppClientSecret>B2810D41C50048E086315cc3eE543bD0</connectedAppClientSecret> <!-- stick your connected app clientSecret-->
+      <connectedAppGrantType>client_credentials</connectedAppGrantType>
+    </properties>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.mule.tools.maven</groupId>
+          <artifactId>mule-maven-plugin</artifactId>
+          <version>${mule.maven.plugin.version}</version>
+          	<configuration>
+				    <armDeployment>
+      					<muleVersion>${app.runtime}</muleVersion>
+      					<uri>https://anypoint.mulesoft.com</uri>
+     					<target>${mule.target}</target>
+      					<targetType>server</targetType>
+      					<connectedAppClientId>${connectedAppClientId}</connectedAppClientId>	
+      					<connectedAppClientSecret>${connectedAppClientSecret}</connectedAppClientSecret>
+      					<connectedAppGrantType>${connectedAppGrantType}</connectedAppGrantType>
+     					<environment>${mule.environment}</environment>
+     					<businessGroup>${mule.businessGroup}</businessGroup>
+      					<properties>
+        					<http.port>8081</http.port>
+      					</properties>
+    				</armDeployment>
+    				<classifier>mule-application</classifier>
+  				</configuration>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+    <!-- CloudHub 2.0 Deployment -->
+  <!-- Development Profile (Sandbox) -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <mule.env>Sandbox</mule.env>
+                <app.name>eqr-cicd-githubactions-dev</app.name>
+            </properties>
+            <build>
+      		<plugins>
+      		<plugin>
+          <groupId>org.mule.tools.maven</groupId>
+          <artifactId>exchange-mule-maven-plugin</artifactId>
+          <version>0.0.23</version>
+          <executions>
+            <execution>
+              <id>exchange-pre-deploy</id>
+              <goals>
+                <goal>exchange-pre-deploy</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>exchange-deploy</id>
+              <goals>
+                <goal>exchange-deploy</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        	<plugin>
+          	<groupId>org.mule.tools.maven</groupId>
+           <artifactId>mule-maven-plugin</artifactId>
+          <version>${mule.maven.plugin.version}</version>
+          <!-- Cloudhub2 deployment configuration -->
+				<configuration>
+					<cloudhub2Deployment>
+						<uri>https://anypoint.mulesoft.com</uri>
+						<muleVersion>${app.runtime}</muleVersion>
+						<releaseChannel>${app.releasechannel}</releaseChannel>
+						<javaVersion>${app.javaversion}</javaVersion>
+						<applicationName>${app.name}</applicationName>
+                        <environment>${mule.env}</environment>
+                        <businessGroup>${anypoint.businessGroup}</businessGroup>
+						<provider>MC</provider>
+						<replicas>1</replicas>
+						<vCores>0.1</vCores>
+						<target>Cloudhub-US-East-2</target>
+						<server>anypoint-exchange-v3</server>
+						<deploymentSettings>
+							<generateDefaultPublicUrl>true</generateDefaultPublicUrl>
+						</deploymentSettings>
+					</cloudhub2Deployment>
+					<classifier>mule-application</classifier>
+				</configuration>
+        </plugin>
+      </plugins>
+    </build>
+        </profile>
+
+        <!-- QA Profile (Test) -->
+        <profile>
+            <id>qa</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <mule.env>Test</mule.env>
+                <app.name>eqr-cicd-githubactions-qa</app.name>
+            </properties>
+            <build>
+      <plugins>
+        <plugin>
+          <groupId>org.mule.tools.maven</groupId>
+          <artifactId>exchange-mule-maven-plugin</artifactId>
+          <version>0.0.23</version>
+          <executions>
+            <execution>
+              <id>exchange-pre-deploy</id>
+              <goals>
+                <goal>exchange-pre-deploy</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>exchange-deploy</id>
+              <goals>
+                <goal>exchange-deploy</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.mule.tools.maven</groupId>
+          <artifactId>mule-maven-plugin</artifactId>
+          <version>${mule.maven.plugin.version}</version>
+          <!-- Cloudhub2 deployment configuration -->
+				<configuration>
+					<cloudhub2Deployment>
+						<uri>https://anypoint.mulesoft.com</uri>
+						<muleVersion>${app.runtime}</muleVersion>
+						<releaseChannel>${app.releasechannel}</releaseChannel>
+						<javaVersion>${app.javaversion}</javaVersion>
+						<applicationName>${app.name}</applicationName>
+                        <environment>${mule.env}</environment>
+                        <businessGroup>${anypoint.businessGroup}</businessGroup>
+						<provider>MC</provider>
+						<replicas>1</replicas>
+						<vCores>0.1</vCores>
+						<target>Cloudhub-US-East-2</target>
+						<server>anypoint-exchange-v3</server>
+						<deploymentSettings>
+							<generateDefaultPublicUrl>true</generateDefaultPublicUrl>
+						</deploymentSettings>
+					</cloudhub2Deployment>
+					<classifier>mule-application</classifier>
+				</configuration>
+        </plugin>
+      </plugins>
+    </build>
+    </profile>
+</profiles>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.2.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-maven-plugin</artifactId>
+				<version>${mule.maven.plugin.version}</version>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-http-connector</artifactId>
+			<version>1.10.3</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-sockets-connector</artifactId>
+			<version>1.2.5</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>anypoint-exchange-v3</id>
+			<name>Anypoint Exchange</name>
+			<url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>mulesoft-releases</id>
+			<name>MuleSoft Releases Repository</name>
+			<url>https://repository.mulesoft.org/releases/</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>mulesoft-releases</id>
+			<name>MuleSoft Releases Repository</name>
+			<layout>default</layout>
+			<url>https://repository.mulesoft.org/releases/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+</project>
