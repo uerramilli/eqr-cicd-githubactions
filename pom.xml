@@ -22,8 +22,7 @@
 	</properties>
 	
 	<!-- Mule maven plugin supports multiple deployment configurations in the same build, even across different profiles. 
-	     Ensure your profiles (dev, onprem, etc.) are not conflicting -->
-	     
+	     Ensure your profiles (dev, onprem, etc.) are not conflicting -->   
 	<profiles>
 	<!-- ✅ On-Prem Runtime Deployment -->
   	<profile>
